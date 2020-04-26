@@ -408,3 +408,6 @@ $ /bin/bash
 $ export PATH=$PATH:/bin/
 $ export PATH=$PATH:/usr/bin
 ```
+### Lateral movement through WMI
+- we already have a root machine, next step is move to other machine in same network.
+- http://www.feidao.site/wordpress/index.php/2020/02/14/wmi/
